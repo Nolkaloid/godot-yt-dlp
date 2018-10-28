@@ -1,7 +1,5 @@
 ![](https://i.imgur.com/SVYqcy6.png)
 
-[Twitter](https://twitter.com/NoeGameDev)
-
 An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Godot engine that works on **Linux**, **OSX** and **Windows**
 
 
@@ -68,3 +66,4 @@ youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/user/folder/", "audio
 ### Future:
 This project needs improvements and you are more than welcome to contribute to it by submitting Issues and Pull Requets.
 
+[![](http://www.download82.com/images/produse/iconuri/twitter-for-android.png)](https://twitter.com/NoeGameDev)
