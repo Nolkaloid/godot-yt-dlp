@@ -66,5 +66,5 @@ youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/user/folder/", "audio
 ### Future:
 This project needs improvements and you are more than welcome to contribute to it by submitting Issues and Pull Requets.
 
-[![](https://www.youtube.com/yt/about/media/images/brand-resources/icons/YouTube-icon-social-media-context.jpg)](https://twitter.com/NoeGameDev)
-[![](https://www.youtube.com/yt/about/media/images/brand-resources/icons/YouTube-icon-social-media-context.jpg)](https://www.youtube.com/channel/UCEg0FrVjeF747OtgCBrtobQ)
+[![](https://i.imgur.com/zJvhBXU.png)](https://twitter.com/NoeGameDev)
+[![](https://i.imgur.com/zJvhBXU.png)](https://www.youtube.com/channel/UCEg0FrVjeF747OtgCBrtobQ)
