@@ -1,7 +1,7 @@
 An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Godot engine that works on **Linux**, **OSX** and **Windows**
 
 ## Features
- - [x] Automatic [youtube-dl](https://github.com/rg3/youtube-dl/) and [ffmpeg] setup.
+ - [x] Automatic [youtube-dl](https://github.com/rg3/youtube-dl/) and [ffmpeg](https://www.ffmpeg.org/) setup.
  - [x] Downloading single videos from YouTube.
  - [x] Converting videos to audio.
  - [ ] Downloading playlists of videos from YouTube. *(yet to be implemented)*
