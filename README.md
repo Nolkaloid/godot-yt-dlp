@@ -1,4 +1,5 @@
-An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Godot engine that works on **Linux**, **OSX** and **Windows**
+![alt text](https://i.imgur.com/keKZXqX.png)An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Godot engine that works on **Linux**, **OSX** and **Windows**
+
 
 ## Features
  - [x] Automatic [youtube-dl](https://github.com/rg3/youtube-dl/) and [ffmpeg](https://www.ffmpeg.org/) setup.
@@ -59,3 +60,7 @@ youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/user/folder/", "audio
  - opus (ogg) - `AUDIO_OPUS`
  - m4a - `AUDIO_M4A`
  - wav - `AUDIO_WAV`
+
+### Future:
+This project needs improvements and you are more than welcome to contribute to it by submitting Issues and Pull Requets.
+
