@@ -67,4 +67,4 @@ youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/user/folder/", "audio
 This project needs improvements and you are more than welcome to contribute to it by submitting Issues and Pull Requets.
 
 [![](https://i.imgur.com/zJvhBXU.png)](https://twitter.com/NoeGameDev)
-[![](https://i.imgur.com/zJvhBXU.png)](https://www.youtube.com/channel/UCEg0FrVjeF747OtgCBrtobQ)
+[![](https://i.imgur.com/691Kq7k.png)](https://www.youtube.com/channel/UCEg0FrVjeF747OtgCBrtobQ)
