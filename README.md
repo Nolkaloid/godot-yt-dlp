@@ -37,15 +37,25 @@ youtube_dl.download(url, destination_path, filename, convert_to_audio, video_for
  - `bool` **convert_to_audio:** If true the video will be converted to the specified audio format
  - `int`  **video_format:** Used to specify the video format to download, use built-in constants like `YouTubeDl.VIDEO_WEBM`.
  - `int` **audio_format:** Used to specify the audio format for conversion, use built-in constants like `YouTubeDl.AUDIO_VORBIS`.
- ### Supported formats:
- #### Video:
- - webm **(only for non 60fps videos)**
- - mp4
- #### Audio:
- - mp3
- - flac
- - aac
- - vorbis (ogg)
- - opus (ogg)
- - m4a
- - wav
+ 
+ #### Examples:
+ Downloading a video:
+```gdscript
+youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/user/folder", "videoclip", false, YouTubeDl.VIDEO_WEBM)
+```
+ Downloading a video as audio:
+ ```gdscript
+youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/user/folder", "audioclip", true, YouTubeDl.VIDEO_WEBM, YouTubeDl.AUDIO_VORBIS)
+```
+ #### Supported formats audio/video formats:
+ ##### Video:
+ - webm - `VIDEO_WEBM` *(only for non 60fps videos)*
+ - mp4 - `VIDEO_MP4`
+ ##### Audio:
+ - mp3 - `AUDIO_MP3`
+ - flac - `AUDIO_FLAC`
+ - aac - `AUDIO_AAC`
+ - vorbis (ogg) - `AUDIO_VORBIS`
+ - opus (ogg) - `AUDIO_OPUS`
+ - m4a - `AUDIO_M4A`
+ - wav - `AUDIO_WAV`
