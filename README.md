@@ -1,4 +1,4 @@
-![alt text](https://i.imgur.com/keKZXqX.png)An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Godot engine that works on **Linux**, **OSX** and **Windows**
+An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Godot engine that works on **Linux**, **OSX** and **Windows**
 
 
 ## Features
