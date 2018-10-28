@@ -1,4 +1,5 @@
 ![](https://i.imgur.com/SVYqcy6.png)
+[Twitter](https://twitter.com/NoeGameDev)
 
 An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Godot engine that works on **Linux**, **OSX** and **Windows**
 
