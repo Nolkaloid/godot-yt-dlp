@@ -18,8 +18,15 @@ An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Go
 
 Create a new Youtube-DL object like this:
 ```gdscript
-var your_youtube_dl_variable = Youtube-Dl.new()
+var youtube_dl = YoutubeDl.new()
 ```
+Usually you will want to connect it's signals immediately like this:
+```gdscript
+youtube_dl.connect("ready", self, "ready_to_dl")
+youtube_dl.connect("download_complete", self, "yt_dowload_complete")
+```
+
+
 
  ### Supported formats:
  #### Video:
