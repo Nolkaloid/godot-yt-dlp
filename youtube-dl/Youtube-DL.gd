@@ -6,8 +6,8 @@ var current_os = OS.get_name()
 var user_directory = OS.get_user_data_dir()
 var _downloader = Downloader.new()
 
-enum VideoFormat {VIDEO_MP4, VIDEO_WEBM}
-enum AudioFormat {AUDIO_AAC, AUDIO_FLAC, AUDIO_MP3, AUDIO_M4A, AUDIO_OPUS, AUDIO_VORBIS, AUDIO_WAV}
+enum {VIDEO_MP4, VIDEO_WEBM}
+enum {AUDIO_AAC, AUDIO_FLAC, AUDIO_MP3, AUDIO_M4A, AUDIO_OPUS, AUDIO_VORBIS, AUDIO_WAV}
 
 signal download_complete
 signal ready
