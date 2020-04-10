@@ -1,6 +1,6 @@
 extends Object
 
-class_name YoutubeDl
+class_name YouTubeDl
 
 var current_os = OS.get_name()
 var user_directory = OS.get_user_data_dir()
@@ -15,30 +15,34 @@ signal ready
 var ready = false
 
 func _init():
+	print("[YouTubeDl]: Downloading latest youtube-dl version...")
 	_downloader.connect("request_completed", self, "_http_download_complete")
-	connect("download_complete", self, "loldelete")
 
 	# Download youtube-dl
 	if current_os == "X11" or current_os == "OSX":
-		_downloader.download_from_web("https://yt-dl.org/downloads/latest/youtube-dl", "user://", "youtube-dl")
+		_downloader.download("https://yt-dl.org/downloads/latest/youtube-dl", "user://", "youtube-dl")
 
 	elif current_os == "Windows":
-		_downloader.download_from_web("https://yt-dl.org/downloads/latest/youtube-dl.exe", "user://", "youtube-dl.exe")
+		_downloader.download("https://yt-dl.org/downloads/latest/youtube-dl.exe", "user://", "youtube-dl.exe")
 
 func _http_download_complete():
 	if current_os == "Windows": # If on Windows, download ffmpeg and ffprobe
+		print("[YouTubeDl]: Downloading ffmpeg and ffprobe")
 		var file = File.new()
 
 		if not file.file_exists("user://ffmpeg.exe"):
 			_downloader.download_from_web("https://framadrive.org/s/AyDTFJ7sRi3T2eD/download", "user://", "ffmpeg.exe")
+			return
 
 		elif not file.file_exists("user://ffprobe.exe"):
 			_downloader.download_from_web("https://framadrive.org/s/tKoXQpcpgG4LKcM/download", "user://", "ffprobe.exe")
+			return
 
 	elif current_os =="X11" or current_os =="OSX": # Else on Linux and OSX make youtube-dl executable
 		OS.execute("chmod", PoolStringArray(["+x", OS.get_user_data_dir()+"/youtube-dl"]), false)
 
 	ready = true
+	print("[YouTubeDl]: Ready!")
 	emit_signal("ready")
 
 func download(url : String, destination_path : String, filename : String = "", convert_to_audio : bool = false, video_format : int = VIDEO_WEBM, audio_format : int = AUDIO_VORBIS):
