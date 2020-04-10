@@ -44,11 +44,11 @@ youtube_dl.download(url, destination_path, filename, convert_to_audio, video_for
  #### Examples:
  Downloading a video:
 ```gdscript
-youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/user/folder/", "videoclip", false, YouTubeDl.VIDEO_WEBM)
+youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/noe/downloads/", "videoclip", false, YouTubeDl.VIDEO_WEBM)
 ```
  Downloading a video as audio:
  ```gdscript
-youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/user/folder/", "audioclip", true, YouTubeDl.VIDEO_WEBM, YouTubeDl.AUDIO_VORBIS)
+youtube_dl.download("https://youtu.be/ogMNV33AhCY", "/home/noe/downloads/", "audioclip", true, YouTubeDl.VIDEO_WEBM, YouTubeDl.AUDIO_VORBIS)
 ```
  #### Supported formats audio/video formats:
  ##### Video:
