@@ -2,6 +2,7 @@ extends Object
 
 class_name YouTubeDl
 
+var thread
 var current_os = OS.get_name()
 var user_directory = OS.get_user_data_dir()
 var _downloader = Downloader.new()
@@ -31,11 +32,11 @@ func _http_download_complete():
 		var file = File.new()
 
 		if not file.file_exists("user://ffmpeg.exe"):
-			_downloader.download_from_web("https://framadrive.org/s/AyDTFJ7sRi3T2eD/download", "user://", "ffmpeg.exe")
+			_downloader.download("https://framadrive.org/s/AyDTFJ7sRi3T2eD/download", "user://", "ffmpeg.exe")
 			return
 
 		elif not file.file_exists("user://ffprobe.exe"):
-			_downloader.download_from_web("https://framadrive.org/s/tKoXQpcpgG4LKcM/download", "user://", "ffprobe.exe")
+			_downloader.download("https://framadrive.org/s/tKoXQpcpgG4LKcM/download", "user://", "ffprobe.exe")
 			return
 
 	elif current_os =="X11" or current_os =="OSX": # Else on Linux and OSX make youtube-dl executable
@@ -96,6 +97,7 @@ func _dl_thread(arguments):
 			OS.execute(str(user_directory) + "/youtube-dl.exe",  PoolStringArray(["-f", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url]), true)
 
 	emit_signal("download_complete")
+	return 0
 
 #func load_ogg():
 #	var path = "user://audio.ogg"
