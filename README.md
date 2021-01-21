@@ -12,9 +12,6 @@ An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Go
  
 ## Installation
 - Clone the repository and place the youtube-dl folder in your project folder.
-- Go to the project settings under **Network/Ssl/Certificates** and select the `ca-certificates.crt` in the youtube-dl folder.
-
-**[IMPORTANT] Note that when exporting your project you will have to add the certificates to the export see [here](http://docs.godotengine.org/en/3.0/tutorials/networking/ssl_certificates.html).**
 
 ## How to use
 ### Setup:
