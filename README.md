@@ -22,7 +22,7 @@ var youtube_dl = YouTubeDl.new()
 Usually you will want to connect it's signals immediately like this:
 ```gdscript
 youtube_dl.connect("ready", self, "ready_to_dl")
-youtube_dl.connect("download_complete", self, "yt_dowload_complete")
+youtube_dl.connect("download_complete", self, "yt_download_complete")
 ```
  - The `ready` signal is emitted when the YouTubeDL object has finished the initial setup and is ready to download YouTube videos. 
  - The  `download_complete` signal is emitted when the YouTubeDL object has finished downloading a video/audio.
