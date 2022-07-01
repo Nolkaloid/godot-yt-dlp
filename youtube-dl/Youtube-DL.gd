@@ -16,15 +16,18 @@ signal ready
 var ready = false
 
 func _init():
-	print("[YouTubeDl]: Downloading latest youtube-dl version...")
+	print("[YouTubeDl]: Downloading latest yt-dlp version...")
 	_downloader.connect("request_completed", self, "_http_download_complete")
 
-	# Download youtube-dl
-	if current_os == "X11" or current_os == "OSX":
-		_downloader.download("https://yt-dl.org/downloads/latest/youtube-dl", "user://", "youtube-dl")
+	# Download yt-dlp
+	if current_os == "X11":
+		_downloader.download("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp", "user://", "yt-dlp")
+
+	elif current_os == "OSX":
+		_downloader.download("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos", "user://", "yt-dlp")
 
 	elif current_os == "Windows":
-		_downloader.download("https://yt-dl.org/downloads/latest/youtube-dl.exe", "user://", "youtube-dl.exe")
+		_downloader.download("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe", "user://", "yt-dlp.exe")
 
 func _http_download_complete():
 	if current_os == "Windows": # If on Windows, download ffmpeg and ffprobe
@@ -39,8 +42,8 @@ func _http_download_complete():
 			_downloader.download("https://framadrive.org/s/tKoXQpcpgG4LKcM/download", "user://", "ffprobe.exe")
 			return
 
-	elif current_os =="X11" or current_os =="OSX": # Else on Linux and OSX make youtube-dl executable
-		OS.execute("chmod", PoolStringArray(["+x", OS.get_user_data_dir()+"/youtube-dl"]), false)
+	elif current_os =="X11" or current_os =="OSX": # Else on Linux and OSX make yt-dlp executable
+		OS.execute("chmod", PoolStringArray(["+x", OS.get_user_data_dir()+"/yt-dlp"]), false)
 
 	ready = true
 	print("[YouTubeDl]: Ready!")
@@ -73,9 +76,9 @@ func _dl_thread(arguments):
 			AUDIO_WAV:format = "wav"
 
 		if current_os == "X11" or current_os == "OSX":
-			OS.execute(str(user_directory) + "/youtube-dl",  PoolStringArray(["-x", "--audio-format", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url]), true)
+			OS.execute(str(user_directory) + "/yt-dlp",  PoolStringArray(["-x", "--audio-format", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url]), true)
 		elif current_os == "Windows":
-			OS.execute(str(user_directory) + "/youtube-dl.exe",  PoolStringArray(["-x", "--audio-format", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url]), true)
+			OS.execute(str(user_directory) + "/yt-dlp.exe",  PoolStringArray(["-x", "--audio-format", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url]), true)
 
 	else:
 		
@@ -92,9 +95,9 @@ func _dl_thread(arguments):
 				dir.remove(destination_path+filename+".mp4")
 	
 		if current_os == "X11" or current_os == "OSX":
-			OS.execute(str(user_directory) + "/youtube-dl",  PoolStringArray(["-f", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url]), true)
+			OS.execute(str(user_directory) + "/yt-dlp",  ["-f", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url])
 		elif current_os == "Windows":
-			OS.execute(str(user_directory) + "/youtube-dl.exe",  PoolStringArray(["-f", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url]), true)
+			OS.execute(str(user_directory) + "/yt-dlp.exe",  PoolStringArray(["-f", format, "--no-continue","-o", destination_path+filename+".%(ext)s",url]), true)
 
 	emit_signal("download_complete")
 	return 0

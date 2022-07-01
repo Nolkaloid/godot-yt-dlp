@@ -1,10 +1,10 @@
 ![](https://i.imgur.com/SVYqcy6.png)
 
-An implementation of [youtube-dl](https://github.com/rg3/youtube-dl/) for the Godot engine that works on **Linux**, **OSX** and **Windows**
+An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the Godot engine that works on **Linux**, **OSX** and **Windows**
 
 
 ## Features
- - [x] Automatic [youtube-dl](https://github.com/rg3/youtube-dl/) and [ffmpeg](https://www.ffmpeg.org/) setup.
+ - [x] Automatic [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [ffmpeg](https://www.ffmpeg.org/) setup.
  - [x] Downloading single videos from YouTube.
  - [x] Converting videos to audio.
  - [ ] Downloading playlists of videos from YouTube. *(yet to be implemented)*
