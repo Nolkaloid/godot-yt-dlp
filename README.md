@@ -7,14 +7,15 @@ An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the Godot en
  - [x] Automatic [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [ffmpeg](https://www.ffmpeg.org/) setup (the latter only on Windows).
  - [x] Downloading single videos from YouTube.
  - [x] Converting videos to audio.
+ - [ ] Tracking download progress. *(yet to be implemented)*
  - [ ] Downloading playlists of videos from YouTube. *(yet to be implemented)*
  - [ ] Searching YouTube videos. *(yet to be implemented)*
  
 ## Installation
 
-- Clone or download the repository and place the `yt-dlp` folder somewhere in your project.
+Clone the repository or [download a release](https://github.com/Nolkaloid/godot-yt-dlp/releases/latest/download/godot-yt-dlp.zip) and place the `yt-dlp` folder somewhere in your project.
 
-> If you're using Linux or exporting to Linux make sure that **ffmpeg** is installed on the system
+> If you're using Linux or exporting to Linux make sure that **ffmpeg** is installed on the system  
 > Same goes for OSX (undocumented)
 
 ## How to use
@@ -96,7 +97,7 @@ var yt_dlp := YtDlp.new()
 yield(yt_dlp, "ready")
 
 yt_dlp.download("https://youtu.be/PSPbY00UZ9w",
-			OS.get_user_data_dir(), "audio_clip", true)
+		OS.get_user_data_dir(), "audio_clip", true)
 
 yield(yt_dlp, "download_completed")
 
