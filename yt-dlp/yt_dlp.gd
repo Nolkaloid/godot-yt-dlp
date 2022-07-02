@@ -91,8 +91,6 @@ func _update_yt_dlp(arguments: Array) -> void:
 	return
 
 
-
-
 func _execute_on_thread(arguments: Array) -> void:
 	var url: String = arguments[0]
 	var destination: String = arguments[1]
@@ -120,7 +118,7 @@ func _execute_on_thread(arguments: Array) -> void:
 		
 		options_and_arguments.append_array(["--format", format])
 	
-	var file_path: String = "'{destination}{file_name}.%(ext)s'" \
+	var file_path: String = "{destination}{file_name}.%(ext)s" \
 			.format({
 				"destination": destination,
 				"file_name": file_name,
