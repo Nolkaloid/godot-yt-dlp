@@ -26,8 +26,8 @@ Usually you will want to connect it's signals immediately like this:
 yt_dlp.connect("ready", self, "some_function")
 yt_dlp.connect("download_completed", self, "some_other_function")
 ```
- - The `ready` signal is emitted when the YtDlp has finished the initial setup and is ready to download videos. 
- - The  `download_completed` signal is emitted when the YtDlp has finished downloading a video/audio.
+ - The `ready` signal is emitted when YtDlp has finished the initial setup and is ready to download videos. 
+ - The  `download_completed` signal is emitted when YtDlp has finished downloading a video/audio.
 
 > You could also use `yield` to wait for the signals
 
@@ -73,7 +73,7 @@ var yt_dlp := YtDlp.new()
 yield(yt_dlp, "ready")
 
 yt_dlp.download("https://youtu.be/dQw4w9WgXcQ",
-			"/home/nolka/videos/", "video_clip")
+		"/home/nolka/videos/", "video_clip")
 
 yield(yt_dlp, "download_finished")
 print("Done!")
