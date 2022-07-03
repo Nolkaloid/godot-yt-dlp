@@ -1,7 +1,8 @@
 ![logo_light](https://user-images.githubusercontent.com/30960698/176983082-18bf15ee-3144-4a54-bab9-bbb9650e63a3.png#gh-light-mode-only)
 ![logo_dark](https://user-images.githubusercontent.com/30960698/176983087-022d7ccd-d94c-43da-a8ff-f8f5736d9c3b.png#gh-dark-mode-only)
 
-An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the Godot engine that works on **Linux**, **OSX** and **Windows**.
+An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the **Godot engine** that works on Linux, OSX and Windows.\
+This project provides a simple API for downloading videos from YouTube (and other websites).
 
 ## Features
  - [x] Automatic [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [ffmpeg](https://www.ffmpeg.org/) setup (the latter only on Windows).
@@ -20,7 +21,7 @@ Clone the repository or [download a release](https://github.com/Nolkaloid/godot-
 
 ## How to use
 
-### Setup:
+### Setup
 
 Create a new `YtDlp` object like this:
 
@@ -38,9 +39,9 @@ yt_dlp.connect("download_completed", self, "some_other_function")
  - The `ready` signal is emitted when YtDlp has finished the initial setup and is ready to download videos. 
  - The `download_completed` signal is emitted when YtDlp has finished downloading a video/audio.
 
-> You could also use `yield` to wait for the signals
+> You could also use [`yield`](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html#coroutines-signals) to await the signals
 
-### Usage:
+### Usage
 
 To download a YouTube video use the `download` function:
 
@@ -63,11 +64,11 @@ yt_dlp.download(
  
  #### Supported formats audio/video formats:
  
- ##### Video:
+ ##### Video
  - `WEBM` *(default)*
  - `MP4`
  
- ##### Audio:
+ ##### Audio
  - `MP3`
  - `FLAC`
  - `AAC`
@@ -76,21 +77,26 @@ yt_dlp.download(
  - `M4A`
  - `WAV`
  
- ### Examples:
+ ## Examples:
  
- #### Downloading a video:
+ #### Downloading a video and playing it in using a `VideoPlayer`
 ```gdscript
 var yt_dlp := YtDlp.new()
 yield(yt_dlp, "ready")
 
 yt_dlp.download("https://youtu.be/dQw4w9WgXcQ",
-		"/home/nolka/videos/", "video_clip")
+		OS.get_user_data_dir(), "video_clip")
 
 yield(yt_dlp, "download_completed")
-print("Done!")
+
+var stream := VideoStreamWebm.new()
+stream.set_file("user://video_clip.webm")
+
+$VideoPlayer.stream = stream
+$VideoPlayer.play()
 ```
 
-#### Downloading a video as audio and playing it in an `AudioStreamPlayer`:
+#### Downloading a video, converting it to audio and playing it using a `AudioStreamPlayer`
 
 ```gdscript
 var yt_dlp := YtDlp.new()
@@ -113,6 +119,7 @@ $AudioStreamPlayer.stream = stream
 $AudioStreamPlayer.play()
 ```
 
-### Social:
+## Social
+
 - https://twitter.com/NoeGameDev
 - https://www.youtube.com/c/Nolkaloid
