@@ -1,10 +1,11 @@
+# warning-ignore-all:return_value_discarded
 class_name YtDlp
 extends Reference
 
 
 signal ready
 signal download_completed
-signal _update_complete
+signal _update_completed
 
 enum Video {MP4, WEBM}
 enum Audio {AAC, FLAC, MP3, M4A, OPUS, VORBIS, WAV}
@@ -21,11 +22,11 @@ const ffmpeg_sources: Dictionary = {
 }
 
 var _downloader: Downloader
-var _thread: Thread
-var _ready: bool = false
+var _thread: Thread = Thread.new()
+var _is_ready: bool = false
 
 
-func _init():
+func _init() -> void:
 	print("[yt-dlp] Downloading the latest yt-dlp version")
 	
 	_downloader = Downloader.new()
@@ -37,10 +38,8 @@ func _init():
 		_downloader.download(yt_dlp_sources[OS.get_name()], "user://%s" % executable_name)
 		yield(_downloader, "download_completed")
 	else:
-		_thread = Thread.new()
-		# warning-ignore:return_value_discarded
 		_thread.start(self, "_update_yt_dlp", [executable_name])
-		yield(self, "_update_complete")
+		yield(self, "_update_completed")
 		# Waits for the next idle frame to join thread
 		yield(Engine.get_main_loop(), "idle_frame") 
 		_thread.wait_to_finish()
@@ -48,23 +47,25 @@ func _init():
 	if OS.get_name() == "Windows":
 		yield(_setup_ffmpeg(), "completed")
 	else:
-		# warning-ignore:return_value_discarded
 		OS.execute("chmod", PoolStringArray(["+x", OS.get_user_data_dir() + "/yt-dlp"]))
 	
 	print("[yt-dlp] Ready!")
-	_ready = true
+	_is_ready = true
 	emit_signal("ready")
 
 
 func download(url: String, destination: String, file_name: String, convert_to_audio: bool = false,
-			video_format: int = Video.WEBM, audio_format: int = Audio.VORBIS) -> void:
+		video_format: int = Video.WEBM, audio_format: int = Audio.VORBIS) -> void:
 	
 	if destination[-1] != '/':
 		destination += '/'
 	
-	if _ready:
-		_thread = Thread.new()
-		# warning-ignore:return_value_discarded
+	if _is_ready:
+		_is_ready = false
+		
+		# Increment the reference count while the thread is running
+		reference()
+		
 		_thread.start(self, "_execute_on_thread",
 				[url, destination, file_name, convert_to_audio, video_format, audio_format])
 	else:
@@ -85,10 +86,8 @@ func _setup_ffmpeg() -> void:
 
 
 func _update_yt_dlp(arguments: Array) -> void:
-	# warning-ignore:return_value_discarded
 	OS.execute("%s/%s" % [OS.get_user_data_dir(), arguments[0]], ["--update"])
-	emit_signal("_update_complete")
-	return
+	emit_signal("_update_completed")
 
 
 func _execute_on_thread(arguments: Array) -> void:
@@ -127,7 +126,15 @@ func _execute_on_thread(arguments: Array) -> void:
 	options_and_arguments.append_array(["--no-continue", "-o", file_path, url])
 	
 	var output: Array = []
-	
-	# warning-ignore:return_value_discarded
 	OS.execute(executable, options_and_arguments, true, output)
+	
+	call_deferred("_thread_finished")
+
+
+func _thread_finished():
 	emit_signal("download_completed")
+	_thread.wait_to_finish()
+	_is_ready = true
+	
+	# Decrement the reference count once the thread is done
+	unreference()

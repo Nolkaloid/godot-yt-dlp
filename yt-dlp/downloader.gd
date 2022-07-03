@@ -1,3 +1,4 @@
+# warning-ignore-all:return_value_discarded
 extends Reference
 
 signal download_completed
@@ -31,12 +32,10 @@ func download(url: String, file_path: String = "user://") -> void:
 	var http_client := HTTPClient.new()
 	
 	print("[downloader] Connecting to %s" % host)
-	# warning-ignore:return_value_discarded
 	http_client.connect_to_host(host, -1, true)
 	
 	# Connection to the host
 	while http_client.get_status() in [HTTPClient.STATUS_CONNECTING, HTTPClient.STATUS_RESOLVING]:
-		# warning-ignore:return_value_discarded
 		http_client.poll()
 		yield(Engine.get_main_loop(), "idle_frame")
 	
@@ -47,12 +46,10 @@ func download(url: String, file_path: String = "user://") -> void:
 		return
 	
 	print("[downloader] Requesting resource at %s" % path)
-	# warning-ignore:return_value_discarded
 	http_client.request(HTTPClient.METHOD_GET, path, _headers)
 	
 	# Request the resource
 	while http_client.get_status() == HTTPClient.STATUS_REQUESTING:
-		# warning-ignore:return_value_discarded
 		http_client.poll()
 		yield(Engine.get_main_loop(), "idle_frame")
 	
@@ -77,13 +74,11 @@ func download(url: String, file_path: String = "user://") -> void:
 
 func _store_body_to_file(http_client: HTTPClient, file_path: String) -> void:
 	var file: File = File.new()
-	# warning-ignore:return_value_discarded
 	file.open(file_path, File.WRITE)
 	
 	var percentage_loaded: float = 0.0
 	
 	while http_client.get_status() == HTTPClient.STATUS_BODY:
-		# warning-ignore:return_value_discarded
 		http_client.poll()
 		file.store_buffer(http_client.read_response_body_chunk())
 		
