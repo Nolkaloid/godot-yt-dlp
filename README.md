@@ -1,16 +1,18 @@
 ![logo_light](https://user-images.githubusercontent.com/30960698/176983082-18bf15ee-3144-4a54-bab9-bbb9650e63a3.png#gh-light-mode-only)
 ![logo_dark](https://user-images.githubusercontent.com/30960698/176983087-022d7ccd-d94c-43da-a8ff-f8f5736d9c3b.png#gh-dark-mode-only)
 
-An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the **Godot engine** that works on Linux, OSX and Windows.\
+An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for **Godot 4.0** that works on Linux, OSX and Windows.\
 This project provides a simple API for downloading videos from YouTube (and other websites).
+
+> **:information_source: Use [v2.0.3](https://github.com/Nolkaloid/godot-yt-dlp/tree/v2.0.3) for Godot 3.x**
 
 ## Features
 
 - [x] Automatic [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [ffmpeg](https://www.ffmpeg.org/) setup (the latter only on Windows).
-- [x] Downloading single videos from YouTube.
+- [x] Downloading single videos.
 - [x] Converting videos to audio.
 - [ ] Tracking download progress. *(yet to be implemented)*
-- [ ] Downloading playlists of videos from YouTube. *(yet to be implemented)*
+- [ ] Downloading playlists of videos. *(yet to be implemented)*
 - [ ] Searching YouTube videos. *(yet to be implemented)*
 
 ## Installation
@@ -31,7 +33,7 @@ You can check if `YtDlp` is ready by using the `is_setup()` method. You can also
 
 ```gdscript
 if not YtDlp.is_setup():
-  YtDlp.setup()
+    YtDlp.setup()
 await YtDlp.setup_completed
 ```
 
@@ -46,10 +48,10 @@ You can check the status of a Download using the `get_status()` method.
 ```gdscript
 # Downloads a video as audio and stores it to "user://audio/ok_computer.mp3"
 var download := YtDlp.download("https://youtu.be/Ya5Fv6VTLYM") \
-    .set_destination("user://audio/") \
-    .set_file_name("ok_computer") \
-    .convert_to_audio(YtDlp.Audio.MP3) \
-    .start()
+        .set_destination("user://audio/") \
+        .set_file_name("ok_computer") \
+        .convert_to_audio(YtDlp.Audio.MP3) \
+        .start()
 
 assert(download.get_status() == YtDlp.Download.Status.DOWNLOADING)
 
@@ -67,14 +69,14 @@ Soon possible, see: <https://github.com/godotengine/godot-proposals/issues/3286>
 
 ```gdscript
 if not YtDlp.is_setup():
-  YtDlp.setup()
-  await YtDlp.setup_completed
+    YtDlp.setup()
+await YtDlp.setup_completed
 
 var download := YtDlp.download("https://youtu.be/Ya5Fv6VTLYM") \
-    .set_destination("user://audio/") \
-    .set_file_name("ok_computer") \
-    .convert_to_audio(YtDlp.Audio.MP3) \
-    .start()
+        .set_destination("user://audio/") \
+        .set_file_name("ok_computer") \
+        .convert_to_audio(YtDlp.Audio.MP3) \
+        .start()
 
 await download.download_completed
 
