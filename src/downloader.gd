@@ -56,6 +56,7 @@ func download(url: String, file_path: String) -> void:
 	match http_client.get_response_code():
 		HTTPClient.RESPONSE_FOUND, HTTPClient.RESPONSE_MOVED_PERMANENTLY:
 			var response_headers := http_client.get_response_headers_as_dictionary()
+			_is_downloading = false
 			download(response_headers["Location"], file_path)
 			return
 	
