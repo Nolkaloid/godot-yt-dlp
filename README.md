@@ -5,16 +5,17 @@ An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for the **Godot 
 This project provides a simple API for downloading videos from YouTube (and other websites).
 
 ## Features
- - [x] Automatic [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [ffmpeg](https://www.ffmpeg.org/) setup (the latter only on Windows).
- - [x] Downloading single videos from YouTube.
- - [x] Converting videos to audio.
- - [ ] Tracking download progress. *(yet to be implemented)*
- - [ ] Downloading playlists of videos from YouTube. *(yet to be implemented)*
- - [ ] Searching YouTube videos. *(yet to be implemented)*
- 
+
+- [x] Automatic [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [ffmpeg](https://www.ffmpeg.org/) setup (the latter only on Windows).
+- [x] Downloading single videos from YouTube.
+- [x] Converting videos to audio.
+- [ ] Tracking download progress. *(yet to be implemented)*
+- [ ] Downloading playlists of videos from YouTube. *(yet to be implemented)*
+- [ ] Searching YouTube videos. *(yet to be implemented)*
+
 ## Installation
 
-Clone the repository or [download a release](https://github.com/Nolkaloid/godot-yt-dlp/releases/latest/download/godot-yt-dlp.zip) and place the `yt-dlp` folder somewhere in your project.
+Clone the repository or [download a release](https://github.com/Nolkaloid/godot-yt-dlp/releases/latest/download/godot-yt-dlp.zip), place it into the `addons/` folder in your project and enable the plugin. See the [Godot Docs](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) for a detailed guide.
 
 > If you're using Linux or exporting to Linux make sure that **ffmpeg** is installed on the system  
 > Same goes for OSX (undocumented)
@@ -23,103 +24,154 @@ Clone the repository or [download a release](https://github.com/Nolkaloid/godot-
 
 ### Setup
 
-Create a new `YtDlp` object like this:
+After enabling the plugin a `YtDlp` autoload singleton will be registered.
+In order to use it you must first call the `setup()` method that will download all relevant depedencies (up-to-date **yt-dlp** and **ffmpeg** if using Windows).
+
+You can check if `YtDlp` is ready by using the `is_setup()` method. You can also connect or await the `setup_completed` signal to be notified when `YtDlp` is ready to download.
 
 ```gdscript
-var yt_dlp = YtDlp.new()
+if not YtDlp.is_setup():
+  YtDlp.setup()
+await YtDlp.setup_completed
 ```
-
-Usually you'll want to connect its signals immediately like this:
-
-```gdscript
-yt_dlp.connect("ready", self, "some_function")
-yt_dlp.connect("download_completed", self, "some_other_function")
-```
-
- - The `ready` signal is emitted when YtDlp has finished the initial setup and is ready to download videos. 
- - The `download_completed` signal is emitted when YtDlp has finished downloading a video/audio.
-
-> You could also use [`yield`](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_basics.html#coroutines-signals) to await the signals
 
 ### Usage
 
-To download a YouTube video use the `download` function:
+To download a video use the `download(url)` method, it will create a `Download` object that can be complemented using [method chaining](https://en.wikipedia.org/wiki/Method_chaining) and started with `start()` method.
+
+You can connect or await the `download_completed` signal, to be notified of when the download is completed.
+
+You can check the status of a Download using the `get_status()` method.
 
 ```gdscript
-yt_dlp.download(
-  url: String,
-  destination: String,
-  file_name: String,
-  convert_to_audio: bool = false,
-  video_format: int = Video.WEBM,
-  audio_format: int = Audio.VORBIS
-)
-```
- - `String` **url:** The video url 
- - `String` **destination:** The folder where you want the video to be downloaded
- - `String` **file_name:** Specify the filename without extension, can be leaved blank
- - `bool` **convert_to_audio:** If true the video will be converted to audio
- - `int`  **video_format:** Used to specify the video format to download, use the built-in enum `YtDlp.Video`.
- - `int` **audio_format:** Used to specify the audio format for conversion, use the built-in enum `YtDlp.Audio`.
- 
- #### Supported formats audio/video formats:
- 
- ##### Video
- - `WEBM` *(default)*
- - `MP4`
- 
- ##### Audio
- - `MP3`
- - `FLAC`
- - `AAC`
- - `VORBIS` *(default)*
- - `OPUS`
- - `M4A`
- - `WAV`
- 
- ## Examples:
- 
- #### Downloading a video and playing it in using a `VideoPlayer`
-```gdscript
-var yt_dlp := YtDlp.new()
-yield(yt_dlp, "ready")
+# Downloads a video as audio and stores it to "user://audio/ok_computer.mp3"
+var download := YtDlp.download("https://youtu.be/Ya5Fv6VTLYM") \
+    .set_destination("user://audio/") \
+    .set_file_name("ok_computer") \
+    .convert_to_audio(YtDlp.Audio.MP3) \
+    .start()
 
-yt_dlp.download("https://youtu.be/dQw4w9WgXcQ",
-		OS.get_user_data_dir(), "video_clip")
+assert(download.get_status() == YtDlp.Download.Status.DOWNLOADING)
 
-yield(yt_dlp, "download_completed")
-
-var stream := VideoStreamWebm.new()
-stream.set_file("user://video_clip.webm")
-
-$VideoPlayer.stream = stream
-$VideoPlayer.play()
+await download.download_completed
+print("Download completed !")
 ```
 
-#### Downloading a video, converting it to audio and playing it using a `AudioStreamPlayer`
+## Examples
+
+### Downloading a video and playing it in using a `VideoPlayer`
+
+Soon possible, see: <https://github.com/godotengine/godot-proposals/issues/3286>
+
+### Downloading a video as audio and playing it using an `AudioStreamPlayer`
 
 ```gdscript
-var yt_dlp := YtDlp.new()
-yield(yt_dlp, "ready")
+if not YtDlp.is_setup():
+  YtDlp.setup()
+  await YtDlp.setup_completed
 
-yt_dlp.download("https://youtu.be/PSPbY00UZ9w",
-		OS.get_user_data_dir(), "audio_clip", true)
+var download := YtDlp.download("https://youtu.be/Ya5Fv6VTLYM") \
+    .set_destination("user://audio/") \
+    .set_file_name("ok_computer") \
+    .convert_to_audio(YtDlp.Audio.MP3) \
+    .start()
 
-yield(yt_dlp, "download_completed")
+await download.download_completed
 
-var ogg_file := File.new()
-ogg_file.open("user://audio_clip.ogg", File.READ)
+var stream = AudioStreamMP3.new()
+var audio_file = FileAccess.open("user://audio/ok_computer.mp3", FileAccess.READ)
 
-var stream := AudioStreamOGGVorbis.new()
-stream.data = ogg_file.get_buffer(ogg_file.get_len())
-
-ogg_file.close()
+stream.data = audio_file.get_buffer(audio_file.get_length())
+audio_file.close()
 
 $AudioStreamPlayer.stream = stream
 $AudioStreamPlayer.play()
 ```
 
+## Reference
+
+### `YtDlp`
+
+#### Signals
+
+##### `setup_completed`
+
+Fired when the setup is completed and `YtDlp` is ready to use
+
+#### Enums
+
+##### Video
+
+- `WEBM` *(default format)*
+- `MP4`
+
+###### Audio
+
+- `MP3` *(default format)*
+- `FLAC`
+- `AAC`
+- `VORBIS`
+- `OPUS`
+- `M4A`
+- `WAV`
+
+#### Methods
+
+#### `setup() -> void`
+
+Sets up the `yt-dlp` dependencies.
+
+#### `download(url: String) -> Download`
+
+Creates a new `Download` with the target `url`.
+
+#### `is_setup() -> bool`
+
+Returns `true` if `YtDlp` is ready to use, else returns `false`
+
+### `Download`
+
+#### Signals
+
+##### `download_completed`
+
+Fired when the download is completed.
+
+#### Enums
+
+##### `Status`
+
+- `READY`
+- `DOWNLOADING`
+- `COMPLETED`
+
+#### Methods
+
+##### `set_destination(destination: String) -> Download`
+
+Sets the destination directory of a download.
+
+##### `set_file_name(file_name: String) -> Download`
+
+Sets the file name of the downloaded file (without file extension).
+
+##### `set_video_format(format: YtDlp.Video) -> Download`
+
+Sets the format of the downloaded video.
+
+##### `convert_to_audio(format: YtDlp.Audio) -> Download`
+
+Marks the download to be converted to audio.
+
+##### `start() -> Download`
+
+Starts the download.
+
+##### `get_status() -> Status:`
+
+Returns the status of the download
+
 ## Social
 
-- https://twitter.com/NoeGameDev
-- https://www.youtube.com/c/Nolkaloid
+- <https://twitter.com/NoeGameDev>
+- <https://www.youtube.com/c/Nolkaloid>
