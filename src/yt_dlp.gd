@@ -90,7 +90,7 @@ class Download extends RefCounted:
 	var _file_name: String = "godot_yt_dlp_download_"
 	var _convert_to_audio: bool = false
 	var _video_format: Video = Video.WEBM
-	var _audio_format: Audio = Audio.VORBIS
+	var _audio_format: Audio = Audio.MP3
 	
 	
 	func _init(url: String):
