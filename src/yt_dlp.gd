@@ -22,7 +22,7 @@ var _thread: Thread = Thread.new()
 var _is_setup: bool = false
 
 
-func is_setup():
+func is_setup() -> bool:
 	return _is_setup
 
 
@@ -34,7 +34,7 @@ func download(url: String) -> Download:
 	return Download.new(url)
 
 
-func setup():
+func setup() -> void:
 	_downloader = Downloader.new()
 	var executable_name: String = "yt-dlp.exe" if OS.get_name() == "Windows" else "yt-dlp"
 	
