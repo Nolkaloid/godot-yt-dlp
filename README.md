@@ -34,7 +34,7 @@ You can check if `YtDlp` is ready by using the `is_setup()` method. You can also
 ```gdscript
 if not YtDlp.is_setup():
     YtDlp.setup()
-await YtDlp.setup_completed
+    await YtDlp.setup_completed
 ```
 
 ### Usage
@@ -70,7 +70,7 @@ Soon possible, see: <https://github.com/godotengine/godot-proposals/issues/3286>
 ```gdscript
 if not YtDlp.is_setup():
     YtDlp.setup()
-await YtDlp.setup_completed
+    await YtDlp.setup_completed
 
 var download := YtDlp.download("https://youtu.be/Ya5Fv6VTLYM") \
         .set_destination("user://audio/") \
