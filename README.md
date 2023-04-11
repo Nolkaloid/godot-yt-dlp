@@ -17,7 +17,7 @@ This project provides a simple API for downloading videos from YouTube (and othe
 
 ## Installation
 
-Clone the repository or [download a release](https://github.com/Nolkaloid/godot-yt-dlp/releases/latest/download/godot-yt-dlp.zip), place it into the `addons/` folder in your project and enable the plugin. See the [Godot Docs](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) for a detailed guide.
+Clone the repository or [download a release](https://github.com/Nolkaloid/godot-yt-dlp/releases/latest), place it into the `addons/` folder in your project and enable the plugin. See the [Godot Docs](https://docs.godotengine.org/en/stable/tutorials/plugins/editor/installing_plugins.html) for a detailed guide.
 
 > If you're using Linux or exporting to Linux make sure that **ffmpeg** is installed on the system  
 > Same goes for OSX (undocumented)
