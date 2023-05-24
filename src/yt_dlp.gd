@@ -10,7 +10,7 @@ const Downloader = preload("res://addons/godot-yt-dlp/src/downloader.gd")
 const yt_dlp_sources: Dictionary = {
 	"Linux": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp",
 	"Windows": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe",
-	"OSX": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos",
+	"macOS": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos",
 }
 const ffmpeg_sources: Dictionary = {
 	"ffmpeg": "https://github.com/Nolkaloid/godot-youtube-dl/releases/latest/download/ffmpeg.exe",
