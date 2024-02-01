@@ -69,7 +69,12 @@ func _setup_ffmpeg() -> void:
 
 func _update_yt_dlp(filename: String) -> void:
 	OS.execute("%s/%s" % [OS.get_user_data_dir(), filename], ["--update"])
-	_update_completed.emit()
+	_thread_finished.call_deferred(_update_completed)
+
+
+func _thread_finished(name: Signal) -> void:
+	if name != null:
+		name.emit()
 
 
 class Download extends RefCounted:
