@@ -1,7 +1,7 @@
 ![logo_light](https://user-images.githubusercontent.com/30960698/176983082-18bf15ee-3144-4a54-bab9-bbb9650e63a3.png#gh-light-mode-only)
 ![logo_dark](https://user-images.githubusercontent.com/30960698/176983087-022d7ccd-d94c-43da-a8ff-f8f5736d9c3b.png#gh-dark-mode-only)
 
-An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for **Godot 4.0** that works on Linux, OSX and Windows.\
+An implementation of [yt-dlp](https://github.com/yt-dlp/yt-dlp) for **Godot 4.x** that works on Linux, OSX and Windows.\
 This project provides a simple API for downloading videos from YouTube (and other websites).
 
 > **:information_source: Use [v2.0.3](https://github.com/Nolkaloid/godot-yt-dlp/tree/v2.0.3) for Godot 3.x**
