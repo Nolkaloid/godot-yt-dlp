@@ -181,3 +181,27 @@ class Download extends RefCounted:
 		self.download_completed.emit()
 		_thread.wait_to_finish()
 		unreference()
+		
+func search(search_term: String, expected_results: int) -> Dictionary:
+	var executable: String = OS.get_user_data_dir() + \
+		("/yt-dlp.exe" if OS.get_name() == "Windows" else "/yt-dlp")
+	
+	var query: String = "\"ytsearch{expected_results}:{search_term}\"" \
+			.format({
+				"expected_results": expected_results,
+				"search_term": search_term
+			})
+	var output: Array = []
+	OS.execute(executable, [query, "-j"], output)
+	
+	var results: Dictionary = {}
+	
+	if output.size() > 0:
+		var splitted_json = output[0].split("\n", false)
+		for i in splitted_json.size():
+			var json_entry = JSON.parse_string(splitted_json[i])
+			results[i] = json_entry
+		return results
+	else:
+		push_error(self, "Search failed.")
+		return results

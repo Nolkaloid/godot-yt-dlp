@@ -90,6 +90,33 @@ $AudioStreamPlayer.stream = stream
 $AudioStreamPlayer.play()
 ```
 
+### Searching for a video and downloading it
+
+```gdscript
+if not YtDlp.is_setup():
+    YtDlp.setup()
+    await YtDlp.setup_completed
+
+var search_results: Dictionary = YtDlp.search("Lemaitre RebMoe - OK Computer karaoke", 2)
+
+var download := YtDlp.download(search_results[0].webpage_url) \
+    .set_destination("user://audio/") \
+    .set_file_name("ok_computer") \
+    .convert_to_audio(YtDlp.Audio.MP3) \
+    .start()
+
+await download.download_completed
+
+var stream = AudioStreamMP3.new()
+var audio_file = FileAccess.open("user://audio/ok_computer.mp3", FileAccess.READ)
+
+stream.data = audio_file.get_buffer(audio_file.get_length())
+audio_file.close()
+
+$AudioStreamPlayer.stream = stream
+$AudioStreamPlayer.play()
+```
+
 ## Reference
 
 ### `YtDlp`
