@@ -180,7 +180,7 @@ class Download extends RefCounted:
 		var output: Array = []
 		OS.execute(executable, PackedStringArray(options_and_arguments), output)
 		
-		if _convert_to_video && _video_format == Video.OGV:
+		if _convert_to_video and _video_format == Video.OGV:
 			var source_video_file_path: String = "{destination}{file_name}.{ext}" \
 				.format({
 					"destination": _destination,
