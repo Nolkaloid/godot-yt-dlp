@@ -181,16 +181,21 @@ class Download extends RefCounted:
 		self.download_completed.emit()
 		_thread.wait_to_finish()
 		unreference()
-		
-func search(search_term: String, expected_results: int) -> Dictionary:
+
+signal search_finished
+
+var _results: Dictionary = {}
+
+func _execute_search_on_thread(search_term: String, expected_results: int) -> void:
 	var executable: String = OS.get_user_data_dir() + \
 		("/yt-dlp.exe" if OS.get_name() == "Windows" else "/yt-dlp")
-	
+
 	var query: String = "\"ytsearch{expected_results}:{search_term}\"" \
-			.format({
-				"expected_results": expected_results,
-				"search_term": search_term
-			})
+		.format({
+			"expected_results": expected_results,
+			"search_term": search_term
+		})
+
 	var output: Array = []
 	OS.execute(executable, [query, "-j"], output)
 	
@@ -201,7 +206,16 @@ func search(search_term: String, expected_results: int) -> Dictionary:
 		for i in splitted_json.size():
 			var json_entry = JSON.parse_string(splitted_json[i])
 			results[i] = json_entry
-		return results
 	else:
 		push_error(self, "Search failed.")
-		return results
+	self._results = results
+	self._search_thread_finished.call_deferred()
+	
+func search(search_term: String, expected_results: int) -> Node:
+	_thread = Thread.new()
+	_thread.start(_execute_search_on_thread.bind(search_term, expected_results))
+	return self
+	
+func _search_thread_finished():
+	self.search_finished.emit(self._results)
+	_thread.wait_to_finish()
