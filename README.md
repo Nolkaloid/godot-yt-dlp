@@ -63,7 +63,30 @@ print("Download completed !")
 
 ### Downloading a video and playing it in using a `VideoPlayer`
 
-Soon possible, see: <https://github.com/godotengine/godot-proposals/issues/3286>
+Possible, but very ineffecient!
+
+Currently the addon is downloading the video as a webm file and then converting it to an ogv file. 
+For the example video this means a 4x file size increase and a conversion of several minutes.
+
+Currently this is caused by a lack of video support in Godot.
+Please see <https://docs.godotengine.org/en/stable/tutorials/animation/playing_videos.html#supported-playback-formats> for more information.
+Godot is working on a better solution here: <https://github.com/godotengine/godot-proposals/issues/3286>
+
+```gdscript
+var download := YtDlp.download("https://youtu.be/Ya5Fv6VTLYM") \
+    .set_destination("user://video/") \
+    .set_file_name("ok_computer") \
+    .convert_to_video(YtDlp.Video.OGV) \
+    .start()
+
+await download.download_completed
+
+var stream = VideoStreamTheora.new()
+stream.file = "user://video/ok_computer.ogv"
+
+%VideoStreamPlayer.stream = stream
+%VideoStreamPlayer.play()
+```
 
 ### Downloading a video as audio and playing it using an `AudioStreamPlayer`
 

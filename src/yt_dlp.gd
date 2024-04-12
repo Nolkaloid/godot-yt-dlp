@@ -3,7 +3,7 @@ extends Node
 signal setup_completed
 signal _update_completed
 
-enum Video {MP4, WEBM}
+enum Video {MP4, WEBM, OGV}
 enum Audio {AAC, FLAC, MP3, M4A, OPUS, VORBIS, WAV}
 
 const Downloader = preload("res://addons/godot-yt-dlp/src/downloader.gd")
@@ -94,6 +94,7 @@ class Download extends RefCounted:
 	var _destination: String = "user://"
 	var _file_name: String = "godot_yt_dlp_download_"
 	var _convert_to_audio: bool = false
+	var _convert_to_video: bool = false
 	var _video_format: Video = Video.WEBM
 	var _audio_format: Audio = Audio.MP3
 	
@@ -122,6 +123,11 @@ class Download extends RefCounted:
 		_audio_format = format
 		_convert_to_audio = true
 		return self
+		
+	func convert_to_video(format: Video) -> Download:
+		_video_format = format
+		_convert_to_video = true
+		return self
 	
 	
 	func get_status() -> Status:
@@ -148,14 +154,15 @@ class Download extends RefCounted:
 		
 		var options_and_arguments: Array = []
 		
+		var format: String
 		if _convert_to_audio:
-			var format: String = (Audio.keys()[_audio_format] as String).to_lower()
+			format = (Audio.keys()[_audio_format] as String).to_lower()
 			options_and_arguments.append_array(["-x", "--audio-format", format])
 		else:
-			var format: String
-			
 			match _video_format:
 				Video.WEBM:
+					format = "bestvideo[ext=webm]+bestaudio"
+				Video.OGV:
 					format = "bestvideo[ext=webm]+bestaudio"
 				Video.MP4:
 					format = "bestvideo[ext=mp4]+m4a"
@@ -172,6 +179,25 @@ class Download extends RefCounted:
 		
 		var output: Array = []
 		OS.execute(executable, PackedStringArray(options_and_arguments), output)
+		
+		if _convert_to_video and _video_format == Video.OGV:
+			var source_video_file_path: String = "{destination}{file_name}.{ext}" \
+				.format({
+					"destination": _destination,
+					"file_name": _file_name,
+					"ext": "webm"
+				})
+			
+			var target_video_file_path: String = "{destination}{file_name}.{ext}" \
+				.format({
+					"destination": _destination,
+					"file_name": _file_name,
+					"ext": (Video.keys()[_video_format] as String).to_lower()
+				})
+			var ffmpeg_path: String = ProjectSettings.globalize_path("user://ffmpeg.exe")
+			
+			#convert with settings recommended by https://docs.godotengine.org/en/stable/tutorials/animation/playing_videos.html#doc-playing-videos-recommended-theora-encoding-settings
+			OS.execute(ffmpeg_path, ["-i", source_video_file_path, "-q:v", "6", "-q:a", "6", target_video_file_path], output, true)
 		
 		self._thread_finished.call_deferred()
 	
