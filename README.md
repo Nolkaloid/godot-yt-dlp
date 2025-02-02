@@ -175,5 +175,5 @@ Returns the status of the download
 
 ## Social
 
-- <https://twitter.com/NoeGameDev>
+- <https://bsky.app/profile/nolkaloid.bsky.social>
 - <https://www.youtube.com/c/Nolkaloid>
