@@ -35,6 +35,8 @@ func download(url: String, file_path: String) -> void:
 			path = result.get_string("path")
 	
 	var http_client := HTTPClient.new()
+	
+	http_client.read_chunk_size = 3e+06
 	http_client.connect_to_host(host, 80 if protocol == "http" else 443)
 	
 	while http_client.get_status() in [HTTPClient.STATUS_CONNECTING, HTTPClient.STATUS_RESOLVING]:
