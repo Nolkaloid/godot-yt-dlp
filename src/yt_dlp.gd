@@ -8,13 +8,12 @@ enum Audio {AAC, FLAC, MP3, M4A, OPUS, VORBIS, WAV}
 
 const Downloader = preload("res://addons/godot-yt-dlp/src/downloader.gd")
 const yt_dlp_sources: Dictionary = {
-	"Linux": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp",
+	"Linux": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux",
 	"Windows": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe",
 	"macOS": "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos",
 }
 const ffmpeg_sources: Dictionary = {
-	"ffmpeg": "https://github.com/Nolkaloid/godot-youtube-dl/releases/latest/download/ffmpeg.exe",
-	"ffprobe": "https://github.com/Nolkaloid/godot-youtube-dl/releases/latest/download/ffprobe.exe",
+	"Windows": "https://github.com/yt-dlp/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
 }
 
 var _downloader: Downloader
@@ -39,9 +38,11 @@ func setup() -> void:
 	var executable_name: String = "yt-dlp.exe" if OS.get_name() == "Windows" else "yt-dlp"
 	
 	if not FileAccess.file_exists("user://%s" % executable_name):
+		# Download new yt-dlp binary
 		_downloader.download(yt_dlp_sources[OS.get_name()], "user://%s" % executable_name)
 		await _downloader.download_completed
 	else:
+		# Update existing yt-dlp
 		_thread.start(_update_yt_dlp.bind(executable_name))
 		await _update_completed
 		# Wait for the next idle frame to join thread
@@ -58,14 +59,30 @@ func setup() -> void:
 
 
 func _setup_ffmpeg() -> void:
-	if not FileAccess.file_exists("user://ffmpeg.exe"):
-		_downloader.download(ffmpeg_sources["ffmpeg"], "user://ffmpeg.exe")
-		await _downloader.download_completed
+	if FileAccess.file_exists("user://ffmpeg.exe") and FileAccess.file_exists("user://ffprobe.exe"):
+		return
 	
-	if not FileAccess.file_exists("user://ffprobe.exe"):
-		_downloader.download(ffmpeg_sources["ffprobe"], "user://ffprobe.exe")
-		await _downloader.download_completed
-
+	const ffmpeg_release_filepath = "user://ffmpeg-release.zip";
+	_downloader.download(ffmpeg_sources["Windows"], ffmpeg_release_filepath)
+	await _downloader.download_completed
+	
+	var zip_reader := ZIPReader.new()
+	var error := zip_reader.open(ffmpeg_release_filepath)
+	if error != OK:
+		push_error(self, "Couldn't extract ffmpeg release: %s" % error_string(error))
+		return
+	
+	var filepaths := Array(zip_reader.get_files()).filter(
+		func(s): return s.contains('bin/ffmpeg') or s.contains('bin/ffprobe')
+	)
+	
+	for f in filepaths:
+		var filename := f.get_file() as String
+		var file := FileAccess.open("user://%s" % filename, FileAccess.WRITE)
+		file.store_buffer(zip_reader.read_file(f))
+		file.close()
+	
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(ffmpeg_release_filepath))
 
 func _update_yt_dlp(filename: String) -> void:
 	OS.execute("%s/%s" % [OS.get_user_data_dir(), filename], ["--update"])
@@ -147,6 +164,17 @@ class Download extends RefCounted:
 				("/yt-dlp.exe" if OS.get_name() == "Windows" else "/yt-dlp")
 		
 		var options_and_arguments: Array = []
+		
+		match OS.get_name():
+			"Windows":
+				options_and_arguments.append_array(["--ffmpeg-location", ProjectSettings.globalize_path("user://")])
+			"Linux", "macOS":
+				# Get the path of system ffmpeg 
+				var output := []
+				OS.execute("which", ["ffmpeg"], output)
+				var ffmpeg_path = output[0].get_base_dir()
+				
+				options_and_arguments.append_array(["--ffmpeg-location", ffmpeg_path])
 		
 		if _convert_to_audio:
 			var format: String = (Audio.keys()[_audio_format] as String).to_lower()
