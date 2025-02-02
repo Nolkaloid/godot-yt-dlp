@@ -91,6 +91,9 @@ $AudioStreamPlayer.play()
 
 ### Searching for a video and downloading it
 
+>[!IMPORTANT]
+> Only available in the `master` branch
+
 ```gdscript
 if not YtDlp.is_setup():
     YtDlp.setup()
