@@ -169,7 +169,7 @@ class Download extends RefCounted:
 		
 		match OS.get_name():
 			"Windows":
-				options_and_arguments.append_array(["--ffmpeg-location", ProjectSettings.globalize_path("user://")])
+				options_and_arguments.append_array(["--ffmpeg-location", ProjectSettings.globalize_path("user://ffmpeg.exe")])
 			"Linux", "macOS":
 				# Get the path of system ffmpeg 
 				var output := []
