@@ -62,7 +62,11 @@ print("Download completed !")
 
 ### Downloading a video and playing it in using a `VideoPlayer`
 
-Soon possible, see: <https://github.com/godotengine/godot-proposals/issues/3286>
+The only supported format in Godot (core) is Ogg Theora, which you won't get straight from YouTube.
+To actually playback the videos can use the following projects:
+
+- https://github.com/EIRTeam/EIRTeam.FFmpeg
+- https://github.com/DeeJayLSP/godot-mpg
 
 ### Downloading a video as audio and playing it using an `AudioStreamPlayer`
 
