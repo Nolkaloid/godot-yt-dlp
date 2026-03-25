@@ -122,6 +122,7 @@ class Download extends RefCounted:
 		READY,
 		DOWNLOADING,
 		COMPLETED,
+		INTERRUPTED
 	}
 
 	var _status: Status = Status.READY
@@ -134,6 +135,7 @@ class Download extends RefCounted:
 	var _convert_to_audio: bool = false
 	var _video_format: Video = Video.WEBM
 	var _audio_format: Audio = Audio.MP3
+	var _is_stopped: bool = false
 
 	func _init(url: String):
 		_url = url
@@ -158,6 +160,10 @@ class Download extends RefCounted:
 
 	func get_status() -> Status:
 		return _status
+
+	func stop() -> void:
+		if(get_status() != Status.COMPLETED):
+			_is_stopped = true
 
 	func start() -> Download:
 		if not _status == Status.READY:
@@ -216,6 +222,11 @@ class Download extends RefCounted:
 
 		options_and_arguments.append_array(["--no-continue", "-o", file_path, _url])
 
+		# Check if the download request was stopped at some point between starting the download, and calling FFMPEG
+		if(_is_stopped):
+			self._thread_stopped.call_deferred()
+			return
+
 		var output: Array = []
 		OS.execute(executable, PackedStringArray(options_and_arguments), output)
 
@@ -224,6 +235,11 @@ class Download extends RefCounted:
 	func _thread_finished():
 		_status = Status.COMPLETED
 		self.download_completed.emit()
+		_thread.wait_to_finish()
+		unreference()
+	
+	func _thread_stopped():
+		_status = Status.INTERRUPTED
 		_thread.wait_to_finish()
 		unreference()
 
@@ -236,10 +252,12 @@ class Search extends RefCounted:
 		SEARCHING,
 		COMPLETED,
 		FAILED,
+		INTERRUPTED
 	}
 
 	var _status: Status = Status.IDLE
 	var _thread: Thread = null
+	var _is_stopped: bool = false
 
 	var _search_term: String
 	var _number_of_results: int
@@ -268,6 +286,10 @@ class Search extends RefCounted:
 			return []
 
 		return self._results.duplicate(true)
+	
+	func stop() -> void:
+		if(get_status() != Status.COMPLETED):
+			_is_stopped = true
 
 	func _execute_on_thread() -> void:
 		var executable: String = (
@@ -282,6 +304,11 @@ class Search extends RefCounted:
 
 		var output: Array[String] = []
 		OS.execute(executable, ["--print-json", "--flat-playlist", query], output)
+		
+		# Check if the search request was stopped at some point between starting the query, and returning the results
+		if(_is_stopped):
+			self._thread_stopped.call_deferred()
+			return
 
 		if output.size() > 0:
 			var json_dump: String = output[0]
@@ -305,3 +332,9 @@ class Search extends RefCounted:
 		self.search_completed.emit()
 		_thread.wait_to_finish()
 		unreference()
+
+	func _thread_stopped():
+		_status = Status.INTERRUPTED
+		_thread.wait_to_finish()
+		unreference()
+
