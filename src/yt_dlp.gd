@@ -66,11 +66,21 @@ func setup() -> void:
 	setup_completed.emit()
 
 
+func _cleanup_ffmpeg_release_archive(ffmpeg_release_filepath: String) -> void:
+	if not FileAccess.file_exists(ffmpeg_release_filepath):
+		return
+
+	var remove_error := DirAccess.remove_absolute(ProjectSettings.globalize_path(ffmpeg_release_filepath))
+	if remove_error != OK and FileAccess.file_exists(ffmpeg_release_filepath):
+		push_warning("Couldn't remove temporary ffmpeg archive: %s" % error_string(remove_error))
+
+
 func _setup_ffmpeg() -> void:
+	const ffmpeg_release_filepath = "user://ffmpeg-release.zip"
 	if FileAccess.file_exists("user://ffmpeg.exe") and FileAccess.file_exists("user://ffprobe.exe"):
+		_cleanup_ffmpeg_release_archive(ffmpeg_release_filepath)
 		return
 	
-	const ffmpeg_release_filepath = "user://ffmpeg-release.zip";
 	_downloader.download(ffmpeg_sources["Windows"], ffmpeg_release_filepath)
 	await _downloader.download_completed
 	
@@ -78,6 +88,7 @@ func _setup_ffmpeg() -> void:
 	var error := zip_reader.open(ffmpeg_release_filepath)
 	if error != OK:
 		push_error(self, "Couldn't extract ffmpeg release: %s" % error_string(error))
+		_cleanup_ffmpeg_release_archive(ffmpeg_release_filepath)
 		return
 	
 	var filepaths := Array(zip_reader.get_files()).filter(
@@ -90,7 +101,8 @@ func _setup_ffmpeg() -> void:
 		file.store_buffer(zip_reader.read_file(f))
 		file.close()
 	
-	DirAccess.remove_absolute(ProjectSettings.globalize_path(ffmpeg_release_filepath))
+	zip_reader.close()
+	_cleanup_ffmpeg_release_archive(ffmpeg_release_filepath)
 
 
 func _update_yt_dlp(filename: String) -> void:
