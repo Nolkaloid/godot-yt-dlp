@@ -1,0 +1,23 @@
+; Install the addon as described in README.md, then open this project.
+config_version=5
+
+[application]
+config/name="yt-dlp Example"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.4", "GL Compatibility")
+
+[autoload]
+YtDlp="*res://addons/godot-yt-dlp/src/yt_dlp.gd"
+
+[display]
+window/size/viewport_width=720
+window/size/viewport_height=960
+window/stretch/mode="canvas_items"
+window/handheld/orientation=1
+
+[editor_plugins]
+enabled=PackedStringArray("res://addons/godot-yt-dlp/plugin.cfg")
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

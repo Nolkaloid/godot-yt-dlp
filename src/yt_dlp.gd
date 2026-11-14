@@ -107,6 +107,9 @@ func extract_info(url: String) -> Dictionary:
 
 
 func setup() -> void:
+	if is_setup() and is_runtime_available():
+		setup_completed.emit()
+		return
 	if _setup_in_progress:
 		return
 	_setup_in_progress = true
@@ -227,12 +230,19 @@ class Download extends RefCounted:
 	var _convert_to_audio: bool = false
 	var _video_format: Video = Video.WEBM
 	var _audio_format: Audio = Audio.MP3
+	var _requested_video_format: Video = Video.WEBM
+	var _requested_audio_format: Audio = Audio.MP3
+	var _format_fallback_enabled := true
 	var _is_stopped: bool = false
 	var _stop_mutex := Mutex.new()
+	var _error_message := ""
 
 	func _is_youtube_url(url: String) -> bool:
-		var normalized := url.to_lower()
-		return normalized.contains("youtube.com/") or normalized.contains("youtu.be/")
+		var address := url.to_lower()
+		if not address.contains("://"):
+			address = "https://" + address
+		var host := address.get_slice("://", 1).get_slice("/", 0).get_slice("?", 0).get_slice("#", 0).get_slice(":", 0)
+		return host == "youtube.com" or host.ends_with(".youtube.com") or host == "youtu.be" or host.ends_with(".youtu.be")
 
 	func _is_direct_webm_url(url: String) -> bool:
 		var path := url.to_lower().split("?", false)[0].split("#", false)[0]
@@ -269,7 +279,7 @@ class Download extends RefCounted:
 
 	func _init(url: String):
 		_url = url
-		_file_name += Time.get_datetime_string_from_system()
+		_file_name += Time.get_datetime_string_from_system().replace(":", "-")
 
 	func set_destination(destination: String) -> Download:
 		_destination = destination
@@ -280,16 +290,78 @@ class Download extends RefCounted:
 		return self
 
 	func set_video_format(format: Video) -> Download:
-		_video_format = format
+		_requested_video_format = format
 		return self
 
 	func convert_to_audio(format: Audio) -> Download:
-		_audio_format = format
+		_requested_audio_format = format
 		_convert_to_audio = true
 		return self
 
+	func set_format_fallback_enabled(enabled: bool) -> Download:
+		_format_fallback_enabled = enabled
+		return self
+
+	func get_output_extension() -> String:
+		if _status == Status.READY:
+			_select_output_formats()
+		if _convert_to_audio:
+			return _audio_extension(_audio_format)
+		return _video_extension(_video_format)
+
+	func _video_extension(format: Video) -> String:
+		return "" if format == Video.AUTO else (Video.keys()[format] as String).to_lower()
+
+	func _audio_extension(format: Audio) -> String:
+		if format == Audio.AUTO:
+			return ""
+		return "ogg" if format == Audio.VORBIS else (Audio.keys()[format] as String).to_lower()
+
+	func _supported_extensions(resource_type: String) -> PackedStringArray:
+		var extensions := ResourceLoader.get_recognized_extensions_for_type(resource_type)
+		# Some extensions register loaders for their concrete stream type only.
+		for stream_type in ClassDB.get_inheriters_from_class(resource_type):
+			extensions.append_array(ResourceLoader.get_recognized_extensions_for_type(stream_type))
+		if resource_type == "AudioStream":
+			# Core audio loaders advertise imported resource suffixes (.mp3str,
+			# .oggvorbisstr, .sample); their stream classes decode the raw formats.
+			var native_audio := {"AudioStreamMP3": "mp3", "AudioStreamOggVorbis": "ogg", "AudioStreamWAV": "wav"}
+			for stream_type in native_audio:
+				if ClassDB.can_instantiate(stream_type):
+					extensions.append(native_audio[stream_type])
+		return extensions
+
+	func _select_output_formats() -> void:
+		_video_format = _requested_video_format
+		_audio_format = _requested_audio_format
+		if not _format_fallback_enabled:
+			return
+		# Ask registered resource loaders rather than depend on a custom engine
+		# or extension class. Snapshot this on the main thread before starting.
+		var video_extensions := _supported_extensions("VideoStream")
+		var audio_extensions := _supported_extensions("AudioStream")
+		if _video_format == Video.AUTO:
+			_video_format = Video.OGV
+			for candidate in [Video.WEBM, Video.MP4, Video.MKV, Video.MOV]:
+				if _video_extension(candidate) in video_extensions:
+					_video_format = candidate
+					break
+		elif not _video_extension(_video_format) in video_extensions:
+			_video_format = Video.OGV
+		if _audio_format == Audio.AUTO:
+			_audio_format = Audio.MP3
+			for candidate in [Audio.OPUS, Audio.M4A, Audio.AAC, Audio.FLAC]:
+				if _audio_extension(candidate) in audio_extensions:
+					_audio_format = candidate
+					break
+		elif not _audio_extension(_audio_format) in audio_extensions:
+			_audio_format = Audio.MP3
+
 	func get_status() -> Status:
 		return _status
+
+	func get_error_message() -> String:
+		return _error_message
 
 	func stop() -> void:
 		if _status in [Status.READY, Status.DOWNLOADING]:
@@ -311,6 +383,7 @@ class Download extends RefCounted:
 			push_error(self, "Download previously started.")
 			return self
 
+		_select_output_formats()
 		_status = Status.DOWNLOADING
 		_destination = ProjectSettings.globalize_path(_destination)
 		_thread = Thread.new()
@@ -337,16 +410,7 @@ class Download extends RefCounted:
 					android_format
 				)
 			else:
-				var android_video_format := ""
-				match _video_format:
-					Video.AUTO:
-						android_video_format = "auto"
-					Video.WEBM:
-						android_video_format = "bestvideo[vcodec^=vp9]+bestaudio[acodec^=opus]/bestvideo[vcodec^=vp8]+bestaudio[acodec^=opus]/bestvideo+bestaudio" if _is_youtube_url(_url) else "bestvideo+bestaudio/best"
-					Video.MP4:
-						android_video_format = "bestvideo[ext=mp4]+m4a"
-					Video.MOV, Video.MKV, Video.OGV:
-						android_video_format = "bestvideo+bestaudio/best"
+				var android_video_format: String = (Video.keys()[_video_format] as String).to_lower()
 				android_ok = AndroidBridge.download_video(
 					_url,
 					_destination,
@@ -390,20 +454,28 @@ class Download extends RefCounted:
 				Video.WEBM:
 					video_format_name = "bestvideo[vcodec^=vp9]+bestaudio[acodec^=opus]/bestvideo[vcodec^=vp8]+bestaudio[acodec^=opus]/bestvideo+bestaudio" if _is_youtube_url(_url) else "bestvideo+bestaudio/best"
 				Video.MP4:
-					video_format_name = "bestvideo[ext=mp4]+m4a"
+					video_format_name = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio/best"
 				Video.MOV, Video.MKV, Video.OGV:
 					video_format_name = "bestvideo+bestaudio/best"
 			options_and_arguments.append_array(["--format", video_format_name])
 
-		var file_path: String = (
-			"{destination}{file_name}.%(ext)s"
-			.format({
-				"destination": _destination,
-				"file_name": _file_name,
-			})
-		)
+		var file_path := _destination.path_join(_file_name + ".%(ext)s")
 
-		if not _convert_to_audio and _video_format == Video.WEBM:
+		if not _convert_to_audio and _video_format == Video.OGV:
+			options_and_arguments.append_array([
+				"--recode-video", "ogg", "--postprocessor-args",
+				"VideoConvertor+ffmpeg_o:-c:v libtheora -q:v 6 -g:v 64 -pix_fmt yuv420p -c:a libvorbis -q:a 6 -ac 2",
+				"--no-keep-video"
+			])
+		elif not _convert_to_audio and _video_format in [Video.MP4, Video.MOV]:
+			options_and_arguments.append_array([
+				"--recode-video", _video_extension(_video_format), "--postprocessor-args",
+				"VideoConvertor+ffmpeg_o:-c:v libx264 -crf 23 -pix_fmt yuv420p -c:a aac",
+				"--no-keep-video"
+			])
+		elif not _convert_to_audio and _video_format == Video.MKV:
+			options_and_arguments.append_array(["--remux-video", "mkv"])
+		elif not _convert_to_audio and _video_format == Video.WEBM:
 			if _is_youtube_url(_url):
 				var vp9_encoder_args := _vp9_encoder_arguments(ProjectSettings.globalize_path("user://ffmpeg.exe") if OS.get_name() == "Windows" else "ffmpeg")
 				options_and_arguments.append_array([
@@ -426,8 +498,31 @@ class Download extends RefCounted:
 			self._thread_finished.call_deferred()
 			return
 		var output: Array = []
-		var exit_code := OS.execute(executable, PackedStringArray(options_and_arguments), output, true)
-		self._thread_finished.call_deferred(exit_code == 0, "" if exit_code == 0 else "\n".join(output))
+		var exit_code := -1
+		for attempt in 2:
+			if _should_stop():
+				break
+			output.clear()
+			exit_code = OS.execute(executable, PackedStringArray(options_and_arguments), output, true)
+			if exit_code == 0 or attempt == 1 or not _is_youtube_url(_url) or not "\n".join(output).contains("HTTP Error 403"):
+				break
+			# Re-extract once for fresh media URLs, preserving format and destination.
+			OS.delay_msec(500)
+		if exit_code == 0 and not _convert_to_audio and _video_format == Video.OGV:
+			# yt-dlp uses .ogg for this container; Godot imports video as .ogv.
+			var rename_error := DirAccess.rename_absolute(_destination.path_join(_file_name + ".ogg"), _destination.path_join(_file_name + ".ogv"))
+			if rename_error != OK:
+				self._thread_finished.call_deferred(false, "Cannot publish the converted Ogg Theora video: %s" % error_string(rename_error))
+				return
+		self._thread_finished.call_deferred(exit_code == 0, "" if exit_code == 0 else "yt-dlp exited with code %d. %s" % [exit_code, _failure_detail("\n".join(output))])
+
+	func _failure_detail(output: String) -> String:
+		var detail := ""
+		for line in output.split("\n", false):
+			var clean := line.strip_edges()
+			if clean.begins_with("ERROR:") or (detail.is_empty() and not clean.is_empty()):
+				detail = clean
+		return detail.left(2048)
 
 	func _thread_finished(succeeded := true, error_message := ""):
 		if _thread != null and _thread.is_started():
@@ -437,11 +532,12 @@ class Download extends RefCounted:
 			unreference()
 			return
 		_status = Status.COMPLETED if succeeded else Status.FAILED
+		_error_message = ""
 		if not succeeded:
-			var message := str(error_message).strip_edges()
-			if message == "":
-				message = "Download failed."
-			push_error(self, message)
+			_error_message = _failure_detail(str(error_message))
+			if _error_message.is_empty():
+				_error_message = "Download failed."
+			push_error(self, _error_message)
 		self.download_completed.emit()
 		unreference()
 
