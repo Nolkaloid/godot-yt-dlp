@@ -1,0 +1,9 @@
+.godot/
+*.gd.uid
+.idea/
+android/.gradle/
+android/build/
+android/local.properties
+example/addons/
+example/android/
+example/exports/
